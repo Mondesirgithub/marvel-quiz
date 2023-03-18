@@ -12,7 +12,7 @@ const Lading = () => {
         // Au bout de 1 seconde on retire les griffres
         refMain.current.classList.remove('startingImg')
         setBoutons(true)
-     }, 1000);
+     }, 500);
   }, [])
 
   const setLeftImage = () => {

@@ -1,17 +1,40 @@
 // Firebase 9
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from '../Firebase/firebase';
 import { Link, useNavigate } from 'react-router-dom'
+import Loader from '../Loader';
 
-const ForgetPassword = props => {
+function validateEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+const ForgetPassword = () => {
 
     const navigate = useNavigate();
 
     const [email, setEmail] = useState("");
     const [success, setSuccess] = useState(null);
     const [error, setError] = useState(null);
+    const [showLoader,setShowLoader] = useState(false)
+    const [message, setMessage] = useState('')
+    const [btn, setBtn] = useState(false)
 
+    useEffect(() => {
+        if(email !== ''){
+            if(!validateEmail(email)){
+                setMessage('Veuillez entrer une adresse email valide')
+                setBtn(false)
+            }else{
+                setBtn(true)
+                setMessage('')
+            }
+        }else{
+            setBtn(false)
+            setMessage('')
+        }
+    }, [email])
 
     const handleSubmit = e => {
         e.preventDefault();
@@ -25,11 +48,18 @@ const ForgetPassword = props => {
         })
         .catch(error => {
             setError(error);
+            setError({
+                ...error,
+                message : 'l\'utilisateur est introuvable, réessayer !'
+              });
+              setShowLoader(false)
         })
 
     }
-
-    const disabled = email === "" ? true : false;
+    const handleShowLoader = () => {
+        setShowLoader(true)
+      }
+    
 
     return (
         <div className="signUpLoginBox">
@@ -60,9 +90,11 @@ const ForgetPassword = props => {
                                 <input onChange={e => setEmail(e.target.value)} value={email} type="email" autoComplete="off" required />
                                 <label htmlFor="email">Email</label>
                             </div>
-
-                            <button disabled={disabled}>Récupérer</button>
-
+                            <h3 style={{color: 'red'}}>{message}</h3>
+                            <button disabled={!btn} onClick={handleShowLoader}>{showLoader ? 'Envoi du mail...' : 'Récupérer'}</button>
+                            {
+                                showLoader && <Loader Mystyle={{width: '15px', height: '15px'}} />
+                            }
                         </form>
 
                         <div className="linkContainer">

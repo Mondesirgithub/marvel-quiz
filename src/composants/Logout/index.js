@@ -28,11 +28,14 @@ const Logout = ({afficherMonMessage}) => {
         setChecked(event.target.checked);
     }
 
+
     return (
         <div className="logoutContainer">
             {
                 error === '' ? null : <span>{error.message}</span>
             }
+            <div style={{display: 'flex'}}>
+            <label style={{margin: '8px 5px 5px 0px'}}>Déconnexion</label>
             <label className="switch">
                 <input
                     onChange={handleChange}
@@ -42,8 +45,9 @@ const Logout = ({afficherMonMessage}) => {
                 />
                 <span className="slider round" data-tip="Déconnexion"></span>
             </label>
+            </div>
         </div>
     )
 }
 
-export default React.(Logout)
+export default React.memo(Logout)

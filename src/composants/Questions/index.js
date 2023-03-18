@@ -1,4 +1,7 @@
 
+import { memo } from "react"
+import { FaChevronRight } from "react-icons/fa"
+
 const Questions = ({suivant, precedent, question, selectedOption, firstLastQuestion,handleSelectedOption}) => {
     
   let bouton = null
@@ -15,15 +18,14 @@ const Questions = ({suivant, precedent, question, selectedOption, firstLastQuest
     <button disabled={!selectedOption.etat} className='btnSubmit' onClick={suivant}>Suivant</button>
   </>
   }
-  
-  
+
   return (
       <div>
         <h2>{question?.question}</h2>
         {
          Array.isArray(question?.options) && 
          question?.options.map((option, index) => {
-            return <p key={index} onClick={handleSelectedOption} className='answerOptions'>{option}</p>
+            return <p key={index} onClick={handleSelectedOption} className='answerOptions'><FaChevronRight />{option}</p>
           })
         } 
         <div style={{display: 'flex', justifyContent: 'space-between'}}>
@@ -33,4 +35,4 @@ const Questions = ({suivant, precedent, question, selectedOption, firstLastQuest
     );
 }
 
-export default Questions
+export default memo(Questions)

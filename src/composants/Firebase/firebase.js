@@ -5,12 +5,12 @@ import { getFirestore, doc } from 'firebase/firestore'
 
 
 const config = {
-    apiKey: "AIzaSyCedG97GPDJy-YQ-rrEOafM97BDziaRc6o",
-    authDomain: "marvel-quiz-1638c.firebaseapp.com",
-    projectId: "marvel-quiz-1638c",
-    storageBucket: "marvel-quiz-1638c.appspot.com",
-    messagingSenderId: "388647465364",
-    appId: "1:388647465364:web:8f8d1c40dc141340e89f81"
+    apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+    authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.REACT_APP_FIREBASE_APP_ID
   };
 
 

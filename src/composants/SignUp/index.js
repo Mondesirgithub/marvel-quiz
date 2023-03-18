@@ -1,9 +1,18 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, {useState, useEffect } from 'react'
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from '../Firebase/firebase';
 import { Link, useNavigate } from 'react-router-dom';
 import { setDoc } from 'firebase/firestore';
 import { user } from '../Firebase/firebase';
+import Loader from '../Loader';
+
+function validateEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+
 
 const SignUp = () => {
   
@@ -14,23 +23,68 @@ const SignUp = () => {
   const [champsValides, setChampsValides] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [showLoader,setShowLoader] = useState(false)
 
   const navigate = useNavigate();
   
-  useEffect(() => {
-    if(pseudo === '' || email === '' || password === '' || confirmPassword === ''){
-      setChampsValides(false)
-    }else{
+  const verifierChamps = () => {
+    if(pseudo !== '' && password !== '' && email !== '' && confirmPassword !== '' && validateEmail(email) === true && password.length > 5 && password === confirmPassword){
+      setChampsValides(true)
       setMessage('')
-      if(password === confirmPassword){
-        setChampsValides(true)
+    }else{
+      setChampsValides(false)
         setMessage('')
-      }else{
-        setMessage("Les mots de passe ne correspondent pas !")
-        setChampsValides(false)
-      }
     }
-  }, [pseudo, email, password, confirmPassword])
+  }
+
+  useEffect(() => {
+    verifierChamps()
+  }, [pseudo])
+
+  useEffect(() => {
+    verifierChamps()
+    if(email !== ''){
+      if(!validateEmail(email)){
+          setChampsValides(false)
+          setMessage('Veuillez entrer une adresse email valide')
+      }
+    }else{
+        setChampsValides(false)
+        setMessage('')
+    }
+  }, [email])
+
+  useEffect(() => {
+    verifierChamps()
+    if (password !== '') {
+      if(password.length > 5){
+          setMessage('')
+          if(password !== confirmPassword){
+            setChampsValides(false)
+            setMessage('Les deux mots de passe ne correspondent pas')
+          }
+      }else{
+          if(password.length <= 5){
+              setChampsValides(false)
+              setMessage('Le mot de passe doit avoir au moins 6 caractères')
+              }
+          }
+      }else{
+          setChampsValides(false)
+          setMessage('')
+      }
+
+  }, [password])
+
+
+  useEffect(() => {
+    verifierChamps()
+    if(password !== confirmPassword){
+      setChampsValides(false)
+      setMessage('Les deux mots de passe ne correspondent pas')
+    }
+  }, [confirmPassword])
+
 
   const handlePseudo = e => {
     setPseudo(e.target.value)
@@ -66,13 +120,19 @@ const SignUp = () => {
         setConfirmPassword('')
     })
     .catch(error => {
-        setError(error);
+      setError({
+        ...error,
+        message : 'Une erreur s\'est produite, soit l\'utilisateur existe déjà soit votre connexion internet est instable'
+      });
+        setShowLoader(false)
     })
 }
 
   // gestion erreurs
   const errorMsg = error === '' ? null : (<span>{error.message}</span>);
-
+  const handleShowLoader = () => {
+    setShowLoader(true)
+  }
 
   return (
     <div className='signUpLoginBox'>
@@ -99,8 +159,11 @@ const SignUp = () => {
                     <input value={confirmPassword} onChange={handleConfirmPassword} type="password" id="confirmPassword" autoComplete='off' required />
                     <label htmlFor='confirmPassword'>Confirmez le mot de passe</label>
                   </div>                  
-                  <h3 style={{color: 'red'}}>{message}</h3>
-                  <button disabled={!champsValides}>S'inscrire</button>
+                  <h6 style={{color: 'red'}}>{message}</h6>
+                  <button disabled={!champsValides} onClick={handleShowLoader}>{showLoader ? 'Chargement...' : 'S\'inscrire'}</button>
+                  {
+                      showLoader && <Loader Mystyle={{width: '15px', height: '15px'}} />
+                  }
                 </form>
                 <div className='linkContainer'>
                   <Link className='simpleLink' to='/login'>Déjà inscrit ? connectew-vous</Link>

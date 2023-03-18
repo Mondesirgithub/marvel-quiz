@@ -3,29 +3,9 @@ import {useEffect, useState, memo} from 'react'
 import Level from '../Level'
 import ProgressBar from '../ProgressBar'
 import Questions from '../Questions'
-import {QuizMarvel} from '../quizMarvel' 
-import { ToastContainer, toast } from 'react-toastify';
+import {QuizMarvel} from '../quizMarvel'
 import 'react-toastify/dist/ReactToastify.css';
-
-const properties = {
-  position: "top-right",
-  autoClose: 2000,
-  hideProgressBar: false,
-  closeOnClick: true,
-  pauseOnHover: true,
-  draggable: false,
-  theme: "colored"
-}
-
-const afficherMessage =  (message, type) => {
-  if(type === 'success'){
-    toast.success(message, properties)
- }else if (type === 'warning'){
-    toast.warn(message, properties)
-  }else if (type === 'error'){
-    toast.error(message, properties)
-  } 
-};
+import QuizOver from '../QuizOver'
 
 
 function ajouterElement(tableau, nouvelElement) {
@@ -35,33 +15,39 @@ function ajouterElement(tableau, nouvelElement) {
   return tableau;
 }
 
-const Quiz = ({error, userData}) => {
-
-  const selectedOptions = {
+const Quiz = ({error, userData,afficherNotif}) => {
+  const [level, setLevel] = useState(0)
+  const [numeroQuestion, setNumeroQuestion] = useState(0)
+  const [questions, setQuestions] = useState({})
+  const [selectedOption, setSelectedOption] = useState({
     prevReponse : [],
     actuelReponse : null,
     nextReponse : [],
     etat : false
-  }
-
-  const [level, setLevel] = useState(0)
-  const [numeroQuestion, setNumeroQuestion] = useState(0)
-  const [questions, setQuestions] = useState({})
-  const [selectedOption, setSelectedOption] = useState({...selectedOptions})
+  })
   const [firstLastQuestion, setFirstLastQuestion] = useState({
     firstQuestion : false,
     lastQuestion : false
   })
   const [answersUser, setAnswersUser] = useState({})
   const [score, setScore] = useState(0)
-  
+  const [notif, setNotif] = useState(false)
 
+ 
 
   useEffect(() => {
       if(userData.pseudo !== undefined){
-      afficherMessage(`Bonjour ${userData.pseudo}`,'warning')
+        setNotif(true)
       }
+      
   }, [userData])
+
+  useEffect(() => {
+    if(notif){
+      afficherNotif(`Salut ${userData.pseudo} et bonne chance 😉`,'default')
+      setNotif(false)
+    }    
+  },[notif])
 
   useEffect(() => {
     const questions = level === 0 ? QuizMarvel[0].quizz.debutant : (level === 1 ? QuizMarvel[0].quizz.confirme : QuizMarvel[0].quizz.expert)
@@ -73,7 +59,7 @@ const Quiz = ({error, userData}) => {
         firstQuestion: true,
         lastQuestion: false
       }))
-    }else if(numeroQuestion === 9){
+    }else if(numeroQuestion === questions.length-1){
       setFirstLastQuestion(prevState => ({
         ...prevState,
         firstQuestion: false,
@@ -101,13 +87,27 @@ const Quiz = ({error, userData}) => {
     }))
   }
 
+  const niveauSuivant = () => {
+    setLevel(level + 1)
+    setNumeroQuestion(0)
+  }
+
+  const rejouer = () => {
+    setNumeroQuestion(0)
+  }
+
+  const recommencer = () => {
+    setLevel(0)
+    setNumeroQuestion(0)
+  }
+
+
   const suivant = () => {
     if(numeroQuestion === 9){
-      //setLevel(level + 1)
-      //setNumeroQuestion(0)
+      setNumeroQuestion(numeroQuestion + 1)
       let sum = 0
       for(let i in answersUser){
-        sum += (answersUser[i] === questions[i].answer.toString())
+        sum += (answersUser[i].toString() === questions[i].answer.toString())
       }
       setScore(sum)
     }else{
@@ -126,20 +126,9 @@ const Quiz = ({error, userData}) => {
     }))    
   }
 
-  
-  useEffect(() => {
-    if(!(questions[numeroQuestion] === undefined)){
-      if(answersUser[numeroQuestion] === questions[numeroQuestion].answer){
-        //afficherMessage('Bravo +1', 'success') 
-      }else{
-        //afficherMessage('Raté 0', 'error')     
-      }
-    }
-  }, [answersUser])
-
 
   const handleSelectedOption = e => {
-    e.target.style.backgroundColor = '#EB1D27'
+    e.target.style.backgroundColor = '#4f78a4'
 
     setSelectedOption(prevState => ({
       ...prevState,
@@ -161,18 +150,24 @@ const Quiz = ({error, userData}) => {
         lesOptions[i].style.backgroundColor = ''
       }
     }else{
-      selectedOption.actuelReponse.style.backgroundColor = '#EB1D27'
+      selectedOption.actuelReponse.style.backgroundColor = '#4f78a4'
       for(let i = 0; i < lesOptions.length; i++){
-        if(lesOptions[i].style.backgroundColor === 'rgb(235, 29, 39)' && lesOptions[i] !== selectedOption.actuelReponse){
+        if(lesOptions[i].style.backgroundColor === 'rgb(79, 120, 164)' && lesOptions[i] !== selectedOption.actuelReponse){
           lesOptions[i].style.backgroundColor = ''
         }
       }
     }
 
-    return (
+    return numeroQuestion === questions.length ? (
+      <QuizOver questions={questions} answersUser={answersUser} 
+        score={score} 
+        niveauSuivant={niveauSuivant} 
+        rejouer={rejouer}
+        recommencer={recommencer}
+        level={level}
+        />
+    ) : (
     <div>
-      { error === '' ? null :  <span>{error.message}</span>}
-
       <Level level={level} />
       <ProgressBar numeroQuestion={numeroQuestion} questions={questions} />
       <Questions selectedOption={selectedOption} 
@@ -181,7 +176,6 @@ const Quiz = ({error, userData}) => {
         firstLastQuestion={firstLastQuestion}
         handleSelectedOption={handleSelectedOption}
         question={questions[numeroQuestion]} />
-      <ToastContainer />
     </div>
   )
   

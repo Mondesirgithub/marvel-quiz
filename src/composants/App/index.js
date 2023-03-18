@@ -11,34 +11,48 @@ import SignUp from '../SignUp';
 import Welcome from '../Welcome';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { IconContext } from 'react-icons'; //pour aligner les icons, par defaut il n'est pas aligné
 
 
-const afficher =  message => toast.warn(`${message}`, {
+const properties = {
   position: "top-right",
-  autoClose: 3000,
+  autoClose: 2000,
   hideProgressBar: false,
   closeOnClick: true,
   pauseOnHover: true,
   draggable: false,
-  theme: "colored",
-  });
+  theme: "colored"
+}
+
+const afficherNotif =  (message, type) => {
+  if(type === 'success'){
+    toast.success(message, properties)
+ }else if (type === 'warning'){
+    toast.warn(message, properties)
+  }else if (type === 'error'){
+    toast.error(message, properties)
+  }else{
+    toast.info(message, properties)
+  }
+};
+
 
 function App() {
   return (
     <BrowserRouter>
+      <IconContext.Provider value={{style: {verticalAlign: 'middle'}}}>
       <Header />
       <ToastContainer />
-      
-      <Routes>
-        <Route path="/" element={<Lading />} />
-        <Route path="/welcome" element={<Welcome afficher={afficher} />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/forgotPassword" element={<ForgetPassword />} />
-        <Route path='*' element={<ErrorPage />} /> 
-      </Routes>
-
+        <Routes>
+          <Route path="/" element={<Lading />} />
+          <Route path="/welcome" element={<Welcome afficherNotif={afficherNotif} />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/forgotPassword" element={<ForgetPassword />} />
+          <Route path='*' element={<ErrorPage />} /> 
+        </Routes>
       <Footer />
+      </IconContext.Provider>
     </BrowserRouter>
   );
 }
